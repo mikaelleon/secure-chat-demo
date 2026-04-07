@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Secure Chat Demo
 
 TODO: Document your project here
