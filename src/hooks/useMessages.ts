@@ -62,9 +62,7 @@ export function useMessages(conversationId: string | null) {
     sender_id: string;
     mode: "symmetric" | "asymmetric";
     shift_key: number | null;
-    original_text: string;
     encrypted_text: string;
-    decrypted_text: string;
   }) {
     if (!conversationId) {
       return { data: null, error: new Error("No conversation selected") };

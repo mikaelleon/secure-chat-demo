@@ -14,7 +14,7 @@ const ChatBubble = ({ message, index }: ChatBubbleProps) => {
         style={{ animationDelay: `${index * 50}ms` }}
       >
         <span className="glass text-xs text-muted-foreground px-4 py-1.5 rounded-full">
-          {message.original}
+          {message.original ?? message.decrypted}
         </span>
       </div>
     );
@@ -59,16 +59,25 @@ const ChatBubble = ({ message, index }: ChatBubbleProps) => {
         )}
       >
         <div className="p-4 space-y-3">
+          {message.original ? (
+            <>
+              <div>
+                <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                  📝 Original
+                </span>
+                <p className="text-foreground text-sm">{message.original}</p>
+              </div>
+              <div className="border-t border-border/30" />
+            </>
+          ) : (
+            <p className="text-[10px] text-muted-foreground leading-snug">
+              Plaintext is not stored on the server — only ciphertext below. Readable text is decrypted on your
+              device.
+            </p>
+          )}
           <div>
             <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-              📝 Original
-            </span>
-            <p className="text-foreground text-sm">{message.original}</p>
-          </div>
-          <div className="border-t border-border/30" />
-          <div>
-            <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-              🔒 Encrypted
+              🔒 Ciphertext (stored)
             </span>
             <p
               className={cn(
@@ -82,7 +91,7 @@ const ChatBubble = ({ message, index }: ChatBubbleProps) => {
           <div className="border-t border-border/30" />
           <div>
             <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-              🔓 Decrypted
+              🔓 Plaintext (local decrypt)
             </span>
             <p className="text-foreground text-sm font-medium">{message.decrypted}</p>
           </div>

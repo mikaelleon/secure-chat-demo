@@ -45,16 +45,21 @@ function formatSidebarTime(iso: string | null) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function toUIMessage(m: MessageWithSender, currentUserId: string): UIMessage {
+function toUIMessage(
+  m: MessageWithSender,
+  currentUserId: string,
+  decryptFn: (cipher: string, mode: EncryptionMode, shift: number) => string,
+): UIMessage {
   const isSent = m.sender_id === currentUserId;
+  const shift = m.shift_key ?? 3;
+  const decrypted = decryptFn(m.encrypted_text, m.mode, shift);
   return {
     id: m.id,
     conversationId: m.conversation_id,
     sender: isSent ? "me" : "them",
     senderName: isSent ? "You" : m.sender?.display_name ?? "Unknown",
-    original: m.original_text,
     encrypted: m.encrypted_text,
-    decrypted: m.decrypted_text,
+    decrypted,
     mode: m.mode,
     shift: m.shift_key ?? undefined,
     timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -118,8 +123,8 @@ export default function ChatPage() {
   }, [conversationId, activeConvMeta]);
 
   const uiMessages: UIMessage[] = useMemo(
-    () => messages.map((m) => toUIMessage(m, userId)),
-    [messages, userId],
+    () => messages.map((m) => toUIMessage(m, userId, decrypt)),
+    [messages, userId, decrypt],
   );
 
   useEffect(() => {
@@ -146,7 +151,6 @@ export default function ChatPage() {
 
     const original = inputValue.trim();
     const encrypted_text = encrypt(original, mode, shiftKey);
-    const decrypted_text = decrypt(encrypted_text, mode, shiftKey);
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     setInputValue("");
@@ -157,9 +161,7 @@ export default function ChatPage() {
       sender_id: user.id,
       mode,
       shift_key: mode === "symmetric" ? shiftKey : null,
-      original_text: original,
       encrypted_text,
-      decrypted_text,
     });
     if (error) {
       console.error(error);

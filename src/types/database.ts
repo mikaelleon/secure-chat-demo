@@ -12,15 +12,14 @@ export type Conversation = {
   created_at: string;
 };
 
+/** Row as stored in DB — ciphertext only; plaintext is never persisted. */
 export type Message = {
   id: string;
   conversation_id: string;
   sender_id: string;
   mode: "symmetric" | "asymmetric";
   shift_key: number | null;
-  original_text: string;
   encrypted_text: string;
-  decrypted_text: string;
   created_at: string;
 };
 

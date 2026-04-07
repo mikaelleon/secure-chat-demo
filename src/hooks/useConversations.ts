@@ -32,7 +32,7 @@ export function useConversations() {
         participant_two,
         created_at,
         messages (
-          original_text,
+          encrypted_text,
           created_at
         )
       `,
@@ -52,15 +52,19 @@ export function useConversations() {
 
         const { data: partner } = await supabase.from("profiles").select("*").eq("id", partnerId).maybeSingle();
 
-        const msgList = (conv.messages ?? []) as { original_text: string; created_at: string }[];
+        const msgList = (conv.messages ?? []) as { encrypted_text: string; created_at: string }[];
         const last = [...msgList].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         )[0];
 
+        const preview = last?.encrypted_text
+          ? `🔒 ${last.encrypted_text.length > 36 ? `${last.encrypted_text.slice(0, 36)}…` : last.encrypted_text}`
+          : null;
+
         return {
           id: conv.id,
           partner,
-          last_message: last?.original_text ?? null,
+          last_message: preview,
           last_message_at: last?.created_at ?? null,
         };
       }),

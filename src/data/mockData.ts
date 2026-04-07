@@ -12,7 +12,8 @@ export interface Message {
   conversationId: string;
   sender: "me" | "them";
   senderName: string;
-  original: string;
+  /** Set for mock/system only; live DB messages omit plaintext — derive from `decrypted` in UI. */
+  original?: string;
   encrypted: string;
   decrypted: string;
   mode: "symmetric" | "asymmetric";
