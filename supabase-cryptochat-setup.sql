@@ -6,6 +6,7 @@
 create table public.profiles (
   id uuid references auth.users (id) on delete cascade primary key,
   display_name text not null,
+  email text,
   created_at timestamptz default now()
 );
 
@@ -96,13 +97,14 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, display_name)
+  insert into public.profiles (id, display_name, email)
   values (
     new.id,
     coalesce(
       new.raw_user_meta_data->>'display_name',
       split_part(new.email, '@', 1)
-    )
+    ),
+    new.email
   );
   return new;
 end;

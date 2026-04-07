@@ -64,5 +64,32 @@ export function useAuth() {
     return supabase.auth.signOut();
   }
 
-  return { session, user, profile, loading, signUp, signIn, signOut };
+  async function updateProfile(displayName: string) {
+    if (!user) return { error: "Not authenticated" as const };
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: displayName })
+      .eq("id", user.id);
+    if (!error) {
+      setProfile((prev) => (prev ? { ...prev, display_name: displayName } : prev));
+      return {};
+    }
+    return { error: error.message };
+  }
+
+  async function updatePassword(newPassword: string) {
+    return supabase.auth.updateUser({ password: newPassword });
+  }
+
+  return {
+    session,
+    user,
+    profile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
+    updatePassword,
+  };
 }

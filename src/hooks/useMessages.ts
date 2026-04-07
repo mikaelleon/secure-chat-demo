@@ -45,6 +45,7 @@ export function useMessages(conversationId: string | null) {
             ({
               id: row.sender_id,
               display_name: "Unknown",
+              email: null,
               created_at: new Date().toISOString(),
             } satisfies Profile);
           setMessages((prev) => [...prev, { ...row, sender }]);

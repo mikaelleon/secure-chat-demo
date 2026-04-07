@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Send, Lock } from "lucide-react";
+import { Send, Lock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GlassCard from "./GlassCard";
 import ModeToggle from "./ModeToggle";
 import ChatBubble from "./ChatBubble";
 import type { Message, Conversation } from "@/data/mockData";
 import type { EncryptionMode } from "@/hooks/useCrypto";
-import { useCrypto } from "@/hooks/useCrypto";
 
 interface ChatWindowProps {
   conversation: Conversation | undefined;
@@ -17,7 +16,9 @@ interface ChatWindowProps {
   onShiftKeyChange: (key: number) => void;
   inputValue: string;
   onInputChange: (value: string) => void;
-  onSendMessage: () => void;
+  onSendMessage: () => void | Promise<void>;
+  bottomRef?: React.RefObject<HTMLDivElement | null>;
+  messagesLoading?: boolean;
 }
 
 const ChatWindow = ({
@@ -30,14 +31,15 @@ const ChatWindow = ({
   inputValue,
   onInputChange,
   onSendMessage,
+  bottomRef,
+  messagesLoading,
 }: ChatWindowProps) => {
   const [sending, setSending] = useState(false);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
     setSending(true);
-    onSendMessage();
-    setTimeout(() => setSending(false), 300);
+    void Promise.resolve(onSendMessage()).finally(() => setSending(false));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -113,7 +115,12 @@ const ChatWindow = ({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-2 space-y-1 min-h-0">
-        {messages.length === 0 ? (
+        {messagesLoading && messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            <span className="text-sm">Loading messages…</span>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-muted-foreground">
               <Lock className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -132,6 +139,7 @@ const ChatWindow = ({
             {messages.map((msg, i) => (
               <ChatBubble key={msg.id} message={msg} index={i} />
             ))}
+            {bottomRef ? <div ref={bottomRef} /> : null}
           </>
         )}
       </div>
