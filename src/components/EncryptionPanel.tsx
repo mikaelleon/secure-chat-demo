@@ -1,6 +1,8 @@
 import { cn } from "@/lib/utils";
 import GlassCard from "./GlassCard";
+import { EncryptionLiveVisualizer } from "./EncryptionLiveVisualizer";
 import { useCrypto, type EncryptionMode } from "@/hooks/useCrypto";
+import { truncateForVisual } from "@/lib/cryptoVisual";
 
 interface LogEntry {
   original: string;
@@ -21,6 +23,8 @@ const EncryptionPanel = ({ mode, shiftKey, inputValue, sessionLog }: EncryptionP
 
   const encrypted = encrypt(inputValue, mode, shiftKey);
   const decrypted = decrypt(encrypted, mode, shiftKey);
+  const visualPlain = truncateForVisual(inputValue);
+  const visualCipher = encrypt(visualPlain, mode, shiftKey);
 
   return (
     <GlassCard className="w-[340px] h-full rounded-2xl flex flex-col shrink-0 overflow-hidden">
@@ -50,6 +54,13 @@ const EncryptionPanel = ({ mode, shiftKey, inputValue, sessionLog }: EncryptionP
             {mode === "symmetric" ? `Shift Key: ${shiftKey}` : "No key — encoding only"}
           </p>
         </GlassCard>
+
+        <EncryptionLiveVisualizer
+          mode={mode}
+          shiftKey={shiftKey}
+          inputValue={inputValue}
+          encrypted={visualCipher}
+        />
 
         {/* Live preview */}
         <div>
